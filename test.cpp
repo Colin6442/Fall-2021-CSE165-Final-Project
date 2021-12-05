@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 #include <Windows.h>
 #include <math.h>
+#include <malloc.h>
 #include "shaderClass.h"
 
 #define PI 3.14159265
@@ -19,8 +20,8 @@ void Rotate(int turn, float* length, GLfloat *vertices, float* currentAngle, dou
 }
 
 void Movement(double xVel, double yVel, GLfloat *vertices, GLfloat* other, float currentAngle) {
-	other[0] = vertices[0]; other[1] = vertices[1]; other[2] = vertices[2]; other[3] = vertices[3]; 
-	other[4] = vertices[4]; other[5] = vertices[5]; other[6] = vertices[6]; other[7] = vertices[7]; 
+	// other[0] = vertices[0] - 0.2; other[1] = vertices[1]; other[3] = vertices[3]- 0.2; 
+	// other[4] = vertices[4]; other[6] = vertices[6]- 0.2; other[7] = vertices[7]; 
 	
 	vertices[0] += (GLfloat)(xVel * cos(currentAngle * PI / 180.0)); vertices[1] += (GLfloat)(yVel * sin(currentAngle * PI / 180.0));
 	vertices[3] += (GLfloat)(xVel * cos(currentAngle * PI / 180.0)); vertices[4] += (GLfloat)(yVel * sin(currentAngle * PI / 180.0));
@@ -85,6 +86,13 @@ void inputDetection(GLFWwindow* window, GLfloat* vertices, GLfloat* other, doubl
 	Rotate(0, length, vertices, currentAngle, angleA, angleB);
 }
 
+struct Square{
+	GLfloat *box;
+	square(GLfloat *in){
+		box = in;
+	}
+};
+
 int main(){
     int windowX = 900;
 	int windowY = 900;
@@ -100,8 +108,7 @@ int main(){
 	}
 	glfwMakeContextCurrent(window);
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-	glViewport(0, 0, windowX, windowY);
-
+	glViewport(0, 0, windowX, windowY); 
 	glewExperimental = true;
 	glewInit();
 
@@ -111,11 +118,23 @@ int main(){
 		0.0f, 0.0f, 0.0f // Upper corner			PointC
 	};
 
-	GLfloat other[] = {
-		-0.05f, 0.1f, 0.0f, // Lower left corner	PointA
-		0.05f, 0.1f, 0.0f, // Lower right corner	PointB
-		0.0f, 0.0f, 0.0f // Upper corner			PointC
+	GLfloat box[] = {
+		// first triangle
+		0.05f,  0.05f, 0.0f,  // top right
+		0.05f, -0.05f, 0.0f,  // bottom right
+		-0.05f,  0.05f, 0.0f,  // top left 
+		// second triangle
+		0.05f, -0.05f, 0.0f,  // bottom right
+		-0.05f, -0.05f, 0.0f,  // bottom left
+		-0.05f,  0.05f, 0.0f   // top left
 	};
+
+	Square* snake = new Square[100];
+
+	unsigned int indices[] = {  // note that we start from 0!
+		0, 1, 3,   // first triangle
+		1, 2, 3    // second triangle
+	}; 
 
 	float currentAngle = 270;
 	float length = sqrt(pow((float)vertices[0], 2.0f) + pow((float)vertices[1], 2.0f));
@@ -132,9 +151,13 @@ int main(){
 
 	unsigned int VBO;
 	glGenBuffers(1, &VBO);
-
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
+
+	unsigned int EBO;
+	glGenBuffers(1, &EBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);  
@@ -146,14 +169,19 @@ int main(){
 		glClear(GL_COLOR_BUFFER_BIT);
 		glClearColor(one, two, three, 1.0f);
 
-		inputDetection(window, vertices, other, &xVel, &yVel, &length, &currentAngle, &angleA, &angleB);
+		inputDetection(window, vertices, box, &xVel, &yVel, &length, &currentAngle, &angleA, &angleB);
 
 		shaderProgram.Activate();
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(other), other, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(box), box, GL_DYNAMIC_DRAW);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
-
+		glDrawArrays(GL_TRIANGLES, 3, 3);
+		for(int i = 0; )
+		glBegin(GL_QUADS);
+		glVertex4f(0,1,2,0);
+		glEnd();
         glfwSwapBuffers(window);
 		glfwPollEvents();
 		Sleep(10);
