@@ -94,7 +94,14 @@ struct Square{
 	}
 	Square(GLfloat *in){
 		box = in;
+		set = true;
 	}
+
+	void setBox(GLfloat *in){
+		box = in;
+		set = true;
+	}
+
 };
 
 int main(){
@@ -134,6 +141,7 @@ int main(){
 	};
 
 	Square* snake = new Square[100];
+	int num = 0;
 
 	unsigned int indices[] = {  // note that we start from 0!
 		0, 1, 3,   // first triangle
@@ -175,22 +183,26 @@ int main(){
 
 		inputDetection(window, vertices, box, &xVel, &yVel, &length, &currentAngle, &angleA, &angleB);
 
+		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS){
+			num++;
+			box[0] += 0.001;
+			snake[num].setBox(box);
+		}
+
 		shaderProgram.Activate();
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(box), box, GL_DYNAMIC_DRAW);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
-		glDrawArrays(GL_TRIANGLES, 3, 3);
-		for(int i = 0; i < 100; i++){
-
+		for(int i = 0; i < num; i++){
+			if(snake[i].set){
+				glBufferData(GL_ARRAY_BUFFER, sizeof(snake[i].box), snake[i].box, GL_DYNAMIC_DRAW);
+				glDrawArrays(GL_TRIANGLES, 0, 3);
+				glDrawArrays(GL_TRIANGLES, 3, 3);
+			}
 		}
-		glBegin(GL_QUADS);
-		glVertex4f(0,1,2,0);
-		glEnd();
         glfwSwapBuffers(window);
 		glfwPollEvents();
-		//Sleep(10);
+		Sleep(10);
 
     }
 }
