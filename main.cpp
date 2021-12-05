@@ -88,7 +88,11 @@ void inputDetection(GLFWwindow* window, GLfloat* vertices, GLfloat* other, doubl
 
 struct Square{
 	GLfloat *box;
-	square(GLfloat *in){
+	bool set;
+	Square(){
+		set = false;
+	}
+	Square(GLfloat *in){
 		box = in;
 	}
 };
@@ -178,7 +182,9 @@ int main(){
 		glBufferData(GL_ARRAY_BUFFER, sizeof(box), box, GL_DYNAMIC_DRAW);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 		glDrawArrays(GL_TRIANGLES, 3, 3);
-		for(int i = 0; )
+		for(int i = 0; i < 100; i++){
+
+		}
 		glBegin(GL_QUADS);
 		glVertex4f(0,1,2,0);
 		glEnd();
