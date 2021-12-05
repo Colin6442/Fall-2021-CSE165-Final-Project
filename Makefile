@@ -1,4 +1,4 @@
-INPUTFILE = test.cpp
+INPUTFILE = main.cpp
 
 OUTPUTFILE = main
 
