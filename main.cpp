@@ -31,10 +31,10 @@ void Movement(double xVel, double yVel, GLfloat *vertices, GLfloat* other, float
 
 void inputDetection(GLFWwindow* window, GLfloat* vertices, GLfloat* other, double* xVel, double* yVel, float* length, float* currentAngle, double* angleA, double* angleB){
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-		if (*xVel < 1.05) {
+		if (*xVel < 1000.05) {
 			*xVel += 0.001;
 		}
-		if (*yVel < 1.05) {
+		if (*yVel < 1000.05) {
 			*yVel += 0.001;
 		}
 	}else{
@@ -184,7 +184,7 @@ int main(){
 		glEnd();
         glfwSwapBuffers(window);
 		glfwPollEvents();
-		Sleep(10);
+		//Sleep(10);
 
     }
 }
