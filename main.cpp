@@ -8,53 +8,6 @@
 #include "shaderClass.h"
 #include <time.h>
 
-struct Square{
-	GLfloat box[18];
-	bool set = false;
-
-	void setBox(GLfloat *in){
-		for(int i = 0; i < 18; i++){
-			box[i] = in[i];
-		}
-		set = true;
-	}
-
-	void moveUp(){
-		box[1] += 0.1; box[4] += 0.1; box[7] += 0.1;
-		box[10] += 0.1; box[13] += 0.1; box[16] += 0.1; 
-	}
-
-	void moveDown(){
-		box[1] -= 0.1; box[4] -= 0.1; box[7] -= 0.1;
-		box[10] -= 0.1; box[13] -= 0.1; box[16] -= 0.1; 
-	}
-
-	void moveLeft(){
-		box[0] -= 0.1; box[3] -= 0.1; box[6] -= 0.1;
-		box[9] -= 0.1; box[12] -= 0.1; box[15] -= 0.1; 
-	}
-
-	void moveRight(){
-		box[0] += 0.1; box[3] += 0.1; box[6] += 0.1;
-		box[9] += 0.1; box[12] += 0.1; box[15] += 0.1;
-	}
-
-	void setBoxRand(){
-		float x = ((rand() % (20 * 2) - 20) / 10.0f);
-		float y = ((rand() % (20 * 2) - 20) / 10.0f);
-
-		box[0] = x; box[1] = y; box[2] =  0;
-		box[3] = x; box[4] = y - 0.1; box[5] = 0;
-		box[6] = x - 0.1; box[7] = y; box[8] = 0;
-
-		box[9] = x; box[10] = y - 0.1; box[11] = 0;
-		box[12] = x - 0.1; box[13] = y - 0.1; box[14] = 0;
-		box[15] = x - 0.1; box[16] = y; box[17] = 0;
-		set = true;
-	}
-
-};
-
 float detCollide(float ax, float ay, float bx, float by){
 	float dx = ax - bx;
 	float dy = ay - by;
@@ -81,9 +34,17 @@ struct gridSpace{
 		gameCoords[12] = xIn - 0.1; gameCoords[13] = yIn - 0.1; gameCoords[14] = 0;
 		gameCoords[15] = xIn - 0.1; gameCoords[16] = yIn; gameCoords[17] = 0;
 	}
-	//yin * 20 + xin
 	void setSnake(){
 		isSnake = true;
+	}
+	void removeSnake(){
+		isSnake = false;
+	}
+	void setApple(){
+		isApple = true;
+	}
+	void removeApple(){
+		isApple = false;
 	}
 
 };
@@ -119,8 +80,6 @@ int main(){
 	// 	-0.05f,  0.05f, 0.0f   // top left
 	// };
 
-
-	Square* snake = new Square[400];
 	gridSpace* grid = new gridSpace[400];
 	for(int i = 0; i < 400; i++){
 		grid[i].setGameCoords(i);
