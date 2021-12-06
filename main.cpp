@@ -6,105 +6,47 @@
 #include <math.h>
 #include <malloc.h>
 #include "shaderClass.h"
-
-#define PI 3.14159265
-
-void Rotate(int turn, float* length, GLfloat *vertices, float* currentAngle, double* angleA, double* angleB) {
-	*currentAngle += turn;
-	*angleA += turn;
-	*angleB += turn;
-	vertices[0] = (GLfloat)(*length * cos(*angleA * PI / 180.0) + vertices[6]);
-	vertices[1] = (GLfloat)(*length * sin(*angleA * PI / 180.0) + vertices[7]);
-	vertices[3] = (GLfloat)(*length * cos(*angleB * PI / 180.0) + vertices[6]);
-	vertices[4] = (GLfloat)(*length * sin(*angleB * PI / 180.0) + vertices[7]);
-}
-
-void Movement(double xVel, double yVel, GLfloat *vertices, GLfloat* other, float currentAngle) {
-	// other[0] = vertices[0] - 0.2; other[1] = vertices[1]; other[3] = vertices[3]- 0.2; 
-	// other[4] = vertices[4]; other[6] = vertices[6]- 0.2; other[7] = vertices[7]; 
-	
-	vertices[0] += (GLfloat)(xVel * cos(currentAngle * PI / 180.0)); vertices[1] += (GLfloat)(yVel * sin(currentAngle * PI / 180.0));
-	vertices[3] += (GLfloat)(xVel * cos(currentAngle * PI / 180.0)); vertices[4] += (GLfloat)(yVel * sin(currentAngle * PI / 180.0));
-	vertices[6] += (GLfloat)(xVel * cos(currentAngle * PI / 180.0)); vertices[7] += (GLfloat)(yVel * sin(currentAngle * PI / 180.0));
-
-}
-
-void inputDetection(GLFWwindow* window, GLfloat* vertices, GLfloat* other, double* xVel, double* yVel, float* length, float* currentAngle, double* angleA, double* angleB){
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-		if (*xVel < 1000.05) {
-			*xVel += 0.001;
-		}
-		if (*yVel < 1000.05) {
-			*yVel += 0.001;
-		}
-	}else{
-		if (*xVel > 0) {
-			*xVel -= 0.0005;
-		}
-		else if (*xVel < 0) {
-			*xVel = 0;
-		}
-		if (*yVel > 0) {
-			*yVel -= 0.0005;
-		}else if (*yVel < 0) {
-			*yVel = 0;
-		}
-	}
-
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-		if (*xVel > 0 || *yVel > 0) {
-			Rotate(5, length, vertices, currentAngle, angleA, angleB);
-		}
-
-	}
-
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-		if (*xVel > 0 || *yVel > 0) {
-			Rotate(-5, length, vertices, currentAngle, angleA, angleB);
-		}
-	}
-
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-		*xVel = 0;
-		*yVel = 0;
-	}
-
-	Movement(*xVel, *yVel, vertices, other, *currentAngle);
-	//x6,y7
-	if (vertices[6] > 1) {
-		vertices[6] = -1;//-0.001;
-	}
-	else if (vertices[6] < -1) {
-		vertices[6] = 1;//+0.001;
-	}
-	if (vertices[7] > 1) {
-		vertices[7] = -1;// -0.001;
-	}
-	else if (vertices[7] < -1) {
-		vertices[7] = 1;// +0.001;
-	}
-	Rotate(0, length, vertices, currentAngle, angleA, angleB);
-}
+#include <time.h>
 
 struct Square{
-	GLfloat *box;
-	bool set;
-	Square(){
-		set = false;
-	}
-	Square(GLfloat *in){
-		box = in;
+	GLfloat box[18];
+	bool set = false;
+
+	void setBox(GLfloat *in){
+		for(int i = 0; i < 18; i++){
+			box[i] = in[i];
+		}
 		set = true;
 	}
 
-	void setBox(GLfloat *in){
-		box = in;
+	void moveUp(){
+		box[0] += 0.1; box[3] += 0.1; box[6] += 0.1;
+		box[9] += 0.1; box[12] += 0.1; box[15] += 0.1; 
+	}
+
+	void moveDown(){
+		box[0] -= 0.1; box[3] -= 0.1; box[6] -= 0.1;
+		box[9] -= 0.1; box[12] -= 0.1; box[15] -= 0.1; 
+	}
+
+	void setBoxRand(){
+		float x = ((rand() % (20 * 2) - 20) / 10.0f);
+		float y = ((rand() % (20 * 2) - 20) / 10.0f);
+
+		box[0] = x; box[1] = y; box[2] =  0;
+		box[3] = x; box[4] = y - 0.1; box[5] = 0;
+		box[6] = x - 0.1; box[7] = y; box[8] = 0;
+
+		box[9] = x; box[10] = y - 0.1; box[11] = 0;
+		box[12] = x - 0.1; box[13] = y - 0.1; box[14] = 0;
+		box[15] = x - 0.1; box[16] = y; box[17] = 0;
 		set = true;
 	}
 
 };
 
 int main(){
+	srand(time(0));
     int windowX = 900;
 	int windowY = 900;
 	glfwInit();
@@ -123,37 +65,20 @@ int main(){
 	glewExperimental = true;
 	glewInit();
 
-	GLfloat vertices[] = {
-		-0.05f, 0.1f, 0.0f, // Lower left corner	PointA
-		0.05f, 0.1f, 0.0f, // Lower right corner	PointB
-		0.0f, 0.0f, 0.0f // Upper corner			PointC
-	};
+	// GLfloat box[] = {
+	// 	// first triangle
+	// 	0.05f,  0.05f, 0.0f,  // top right
+	// 	0.05f, -0.05f, 0.0f,  // bottom right
+	// 	-0.05f,  0.05f, 0.0f,  // top left 
+	// 	// second triangle
+	// 	0.05f, -0.05f, 0.0f,  // bottom right
+	// 	-0.05f, -0.05f, 0.0f,  // bottom left
+	// 	-0.05f,  0.05f, 0.0f   // top left
+	// };
 
-	GLfloat box[] = {
-		// first triangle
-		0.05f,  0.05f, 0.0f,  // top right
-		0.05f, -0.05f, 0.0f,  // bottom right
-		-0.05f,  0.05f, 0.0f,  // top left 
-		// second triangle
-		0.05f, -0.05f, 0.0f,  // bottom right
-		-0.05f, -0.05f, 0.0f,  // bottom left
-		-0.05f,  0.05f, 0.0f   // top left
-	};
 
-	Square* snake = new Square[100];
+	Square* snake = new Square[500];
 	int num = 0;
-
-	unsigned int indices[] = {  // note that we start from 0!
-		0, 1, 3,   // first triangle
-		1, 2, 3    // second triangle
-	}; 
-
-	float currentAngle = 270;
-	float length = sqrt(pow((float)vertices[0], 2.0f) + pow((float)vertices[1], 2.0f));
-	double angleA = acos(vertices[0] / length) * 180.0/PI;
-	double angleB = acos(vertices[3] / length) * 180.0/PI;
-	double xVel = 0;
-	double yVel = 0;
 
 	Shader shaderProgram("vertexShaders/default.vert", "fragmentShaders/default.frag");
 
@@ -162,16 +87,16 @@ int main(){
 	glBindVertexArray(VAO);
 
 	unsigned int VBO;
-	glGenBuffers(1, &VBO);
+	glGenBuffers(3, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-	unsigned int EBO;
-	glGenBuffers(1, &EBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+	// unsigned int EBO;
+	// glGenBuffers(1, &EBO);
+	// glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	// glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
 	glEnableVertexAttribArray(0);  
 
 
@@ -181,24 +106,25 @@ int main(){
 		glClear(GL_COLOR_BUFFER_BIT);
 		glClearColor(one, two, three, 1.0f);
 
-		inputDetection(window, vertices, box, &xVel, &yVel, &length, &currentAngle, &angleA, &angleB);
-
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS){
+			snake[num].setBoxRand();
 			num++;
-			box[0] += 0.001;
-			snake[num].setBox(box);
+		}
+
+		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
+			snake[0].moveUp();
+		}
+		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){
+			snake[0].moveDown();
 		}
 
 		shaderProgram.Activate();
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+
 		for(int i = 0; i < num; i++){
-			if(snake[i].set){
-				glBufferData(GL_ARRAY_BUFFER, sizeof(snake[i].box), snake[i].box, GL_DYNAMIC_DRAW);
-				glDrawArrays(GL_TRIANGLES, 0, 3);
-				glDrawArrays(GL_TRIANGLES, 3, 3);
-			}
+			glBufferData(GL_ARRAY_BUFFER, sizeof(snake[i].box), snake[i].box, GL_STATIC_DRAW);
+			glDrawArrays(GL_TRIANGLES, 0, 3);
+			glDrawArrays(GL_TRIANGLES, 3, 3);
 		}
         glfwSwapBuffers(window);
 		glfwPollEvents();
