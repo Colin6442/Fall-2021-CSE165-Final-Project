@@ -9,12 +9,15 @@
 #include <time.h>
 #include "soil\inc\SOIL\SOIL.h"
 
-float detCollide(float ax, float ay, float bx, float by){
-	float dx = ax - bx;
-	float dy = ay - by;
-	float distance = sqrt((dx*dx)+(dy*dy));
-	return distance; // for collision in structs.
-}
+
+enum direction{
+	LEFT = -1,
+	RIGHT = 1,
+	UP = -20,
+	DOWN = 20,
+};
+
+int currentDirection = RIGHT;
 
 struct gridSpace{
 	int index;
@@ -200,17 +203,6 @@ int main(){
 	glewInit();
 
 	int length = 4;
-	// GLfloat box[] = {
-	// 	// first triangle
-	// 	0.05f,  0.05f, 0.0f,  // top right
-	// 	0.05f, -0.05f, 0.0f,  // bottom right
-	// 	-0.05f,  0.05f, 0.0f,  // top left 
-	// 	// second triangle
-	// 	0.05f, -0.05f, 0.0f,  // bottom right
-	// 	-0.05f, -0.05f, 0.0f,  // bottom left
-	// 	-0.05f,  0.05f, 0.0f   // top left
-	// };
-
 	gridSpace* grid = new gridSpace[400];
 	for(int i = 0; i < 400; i++){
 		grid[i].setGameCoords(i);
