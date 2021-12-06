@@ -55,6 +55,39 @@ struct Square{
 
 };
 
+float detCollide(float ax, float ay, float bx, float by){
+	float dx = ax - bx;
+	float dy = ay - by;
+	float distance = sqrt((dx*dx)+(dy*dy));
+	return distance; // for collision in structs.
+}
+
+struct gridSpace{
+	bool isSnake = false;
+	bool isApple = false;
+	float x;
+	float y;
+
+	GLfloat gameCoords[18];
+
+	void setGameCoords(int index){
+		float xIn = index % 20, yIn = (index - xIn)/20;
+		xIn = xIn/10 - 0.899; yIn = yIn/10 - 0.999; yIn = -yIn;
+		gameCoords[0] = xIn; gameCoords[1] = yIn; gameCoords[2] =  0;
+		gameCoords[3] = xIn; gameCoords[4] = yIn - 0.1; gameCoords[5] = 0;
+		gameCoords[6] = xIn - 0.1; gameCoords[7] = yIn; gameCoords[8] = 0;
+
+		gameCoords[9] = xIn; gameCoords[10] = yIn - 0.1; gameCoords[11] = 0;
+		gameCoords[12] = xIn - 0.1; gameCoords[13] = yIn - 0.1; gameCoords[14] = 0;
+		gameCoords[15] = xIn - 0.1; gameCoords[16] = yIn; gameCoords[17] = 0;
+	}
+	//yin * 20 + xin
+	void setSnake(){
+		isSnake = true;
+	}
+
+};
+
 int main(){
 	srand(time(0));
     int windowX = 900;
@@ -87,7 +120,17 @@ int main(){
 	// };
 
 
-	Square* snake = new Square[500];
+	Square* snake = new Square[400];
+	gridSpace* grid = new gridSpace[400];
+	for(int i = 0; i < 400; i++){
+		grid[i].setGameCoords(i);
+		if(i < 400){
+			grid[i].setSnake();
+		}
+	}
+
+	grid[0].setSnake();
+
 	int num = 0;
 
 	Shader shaderProgram("vertexShaders/default.vert", "fragmentShaders/default.frag");
@@ -120,7 +163,9 @@ int main(){
 			snake[num].setBoxRand();
 			num++;
 		}
-
+		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
+			break;
+		}
 		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
 			snake[0].moveUp();
 		}
@@ -134,15 +179,25 @@ int main(){
 			snake[0].moveRight();
 		}
 		
-
+		
 		shaderProgram.Activate();
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-		for(int i = 0; i < num; i++){
-			glBufferData(GL_ARRAY_BUFFER, sizeof(snake[i].box), snake[i].box, GL_STATIC_DRAW);
-			glDrawArrays(GL_TRIANGLES, 0, 3);
-			glDrawArrays(GL_TRIANGLES, 3, 3);
+		// for(int i = 0; i < num; i++){
+		// 	glBufferData(GL_ARRAY_BUFFER, sizeof(snake[i].box), snake[i].box, GL_STATIC_DRAW);
+		// 	glDrawArrays(GL_TRIANGLES, 0, 3);
+		// 	glDrawArrays(GL_TRIANGLES, 3, 3);
+		// }
+
+		for(int i = 0; i < 400; i++){
+			if(grid[i].isSnake){
+				//printf("%f\n", i);
+				glBufferData(GL_ARRAY_BUFFER, sizeof(grid[i].gameCoords), grid[i].gameCoords, GL_STATIC_DRAW);
+				glDrawArrays(GL_TRIANGLES, 0, 3);
+				glDrawArrays(GL_TRIANGLES, 3, 3);
+			}
 		}
+
         glfwSwapBuffers(window);
 		glfwPollEvents();
 		Sleep(10);
