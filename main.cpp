@@ -20,13 +20,23 @@ struct Square{
 	}
 
 	void moveUp(){
-		box[0] += 0.1; box[3] += 0.1; box[6] += 0.1;
-		box[9] += 0.1; box[12] += 0.1; box[15] += 0.1; 
+		box[1] += 0.1; box[4] += 0.1; box[7] += 0.1;
+		box[10] += 0.1; box[13] += 0.1; box[16] += 0.1; 
 	}
 
 	void moveDown(){
+		box[1] -= 0.1; box[4] -= 0.1; box[7] -= 0.1;
+		box[10] -= 0.1; box[13] -= 0.1; box[16] -= 0.1; 
+	}
+
+	void moveLeft(){
 		box[0] -= 0.1; box[3] -= 0.1; box[6] -= 0.1;
 		box[9] -= 0.1; box[12] -= 0.1; box[15] -= 0.1; 
+	}
+
+	void moveRight(){
+		box[0] += 0.1; box[3] += 0.1; box[6] += 0.1;
+		box[9] += 0.1; box[12] += 0.1; box[15] += 0.1;
 	}
 
 	void setBoxRand(){
@@ -117,6 +127,13 @@ int main(){
 		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){
 			snake[0].moveDown();
 		}
+		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
+			snake[0].moveLeft();
+		}
+		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
+			snake[0].moveRight();
+		}
+		
 
 		shaderProgram.Activate();
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
